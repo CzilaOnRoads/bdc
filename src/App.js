@@ -2,6 +2,7 @@ import { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import "./styles.css"; // Assurez-vous que ce fichier est bien importé
+import logo from "./logo.png";
 
 export default function BonDeCommande() {
   const [entreprise, setEntreprise] = useState("");
@@ -71,7 +72,7 @@ export default function BonDeCommande() {
   return (
     <div className="container">
       <div className="flex justify-center mb-4">
-        <img src="/logo.png" alt="Logo de l'entreprise" className="h-16" />
+        <img src="./logo.png" alt="Logo de l'entreprise" className="h-16" />
       </div>
       <h1>Bon de Commande</h1>
 
