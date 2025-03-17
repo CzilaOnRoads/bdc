@@ -4,6 +4,12 @@ import autoTable from "jspdf-autotable";
 import "./styles.css"; // Assurez-vous que ce fichier est bien importé
 import logo from "./logo.png";
 
+const handleFirstInput = () => {
+  if (!dateSaisie) {
+    setDateSaisie(new Date());
+  }
+};
+
 export default function BonDeCommande() {
   const [entreprise, setEntreprise] = useState("");
   const [email, setEmail] = useState("");
@@ -32,23 +38,28 @@ export default function BonDeCommande() {
 
   const genererPDF = () => {
     const doc = new jsPDF();
+    const dateGeneration = new Date();
+    const dateSaisieFormatee = dateSaisie
+      ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(dateSaisie)
+      : "Non renseignée";
+    const dateGenerationFormatee = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(dateGeneration);
   
-    // Charger l'image en Base64 avant de générer le PDF
     const img = new Image();
-    img.src = logo; // Assurez-vous que logo est bien importé au début du fichier
+    img.src = logo;
   
     img.onload = () => {
-      doc.addImage(img, "PNG", 10, 5, 50, 20); // Ajout du logo en haut à gauche
-  
+      doc.addImage(img, "PNG", 10, 5, 50, 20);
       doc.setFontSize(16);
       doc.text("Bon de commande", 105, 35, { align: "center" });
   
       doc.setFontSize(12);
       doc.text(`Entreprise: ${entreprise}`, 10, 50);
       doc.text(`Email: ${email}`, 10, 60);
+      doc.text(`Date de saisie: ${dateSaisieFormatee}`, 10, 70);
+      doc.text(`Date de génération: ${dateGenerationFormatee}`, 10, 80);
   
       autoTable(doc, {
-        startY: 70,
+        startY: 90,
         head: [["Référence", "Quantité", "Prix HT (€)", "Remise (%)", "Total (€)"]],
         body: articles.map((article) => [
           article.reference,
@@ -64,9 +75,8 @@ export default function BonDeCommande() {
       doc.text(`Total HT: ${totalGeneralHT.toFixed(2)} €`, 10, positionY);
       doc.text(`Total TTC: ${totalTTC} €`, 10, positionY + 10);
   
-      // Nom du fichier avec le nom de l'entreprise
       const nomEntreprise = entreprise.trim() !== "" ? entreprise.replace(/\s+/g, "_") : "bon_de_commande";
-      doc.save(`BDC-${nomEntreprise}.pdf`);
+      doc.save(`${nomEntreprise}.pdf`);
     };
   
     img.onerror = () => {
