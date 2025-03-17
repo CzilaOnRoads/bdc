@@ -4,12 +4,13 @@ import autoTable from "jspdf-autotable";
 import "./styles.css"; // Assurez-vous que ce fichier est bien importé
 import logo from "./logo.png";
 
+const [dateSaisie, setDateSaisie] = useState(null);
+
 const handleFirstInput = () => {
   if (!dateSaisie) {
     setDateSaisie(new Date());
   }
 };
-
 export default function BonDeCommande() {
   const [entreprise, setEntreprise] = useState("");
   const [email, setEmail] = useState("");
