@@ -4,20 +4,20 @@ import autoTable from "jspdf-autotable";
 import "./styles.css"; // Assurez-vous que ce fichier est bien importé
 import logo from "./logo.png";
 
-const [dateSaisie, setDateSaisie] = useState(null);
-
-const handleFirstInput = () => {
-  if (!dateSaisie) {
-    setDateSaisie(new Date());
-  }
-};
 export default function BonDeCommande() {
+  const [dateSaisie, setDateSaisie] = useState(null);
   const [entreprise, setEntreprise] = useState("");
   const [email, setEmail] = useState("");
   const [articles, setArticles] = useState([]);
 
+  const handleFirstInput = () => {
+    if (!dateSaisie) {
+      setDateSaisie(new Date());
+    }
+  };
+
   const ajouterArticle = () => {
-    setArticles([...articles, { reference: "", quantite: 1, prixHT: 0,  remise: 0 }]);
+    setArticles([...articles, { reference: "", quantite: 1, prixHT: 0, remise: 0 }]);
   };
 
   const mettreAJourArticle = (index, field, value) => {
@@ -44,21 +44,20 @@ export default function BonDeCommande() {
       ? new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(dateSaisie)
       : "Non renseignée";
     const dateGenerationFormatee = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long", timeStyle: "short" }).format(dateGeneration);
-  
+
     const img = new Image();
     img.src = logo;
-  
+
     img.onload = () => {
       doc.addImage(img, "PNG", 10, 5, 50, 20);
       doc.setFontSize(16);
       doc.text("Bon de commande", 105, 35, { align: "center" });
-  
+
       doc.setFontSize(12);
       doc.text(`Entreprise: ${entreprise}`, 10, 50);
       doc.text(`Email: ${email}`, 10, 60);
-      doc.text(`Date de saisie: ${dateSaisieFormatee}`, 10, 70);
-      doc.text(`Date de génération: ${dateGenerationFormatee}`, 10, 80);
-  
+      doc.text(`Date de création: ${dateGenerationFormatee}`, 10, 70);
+
       autoTable(doc, {
         startY: 90,
         head: [["Référence", "Quantité", "Prix HT (€)", "Remise (%)", "Total (€)"]],
@@ -71,26 +70,25 @@ export default function BonDeCommande() {
         ]),
         theme: "grid",
       });
-  
+
       const positionY = doc.lastAutoTable.finalY + 10;
       doc.text(`Total HT: ${totalGeneralHT.toFixed(2)} €`, 10, positionY);
       doc.text(`Total TTC: ${totalTTC} €`, 10, positionY + 10);
-  
+
       const nomEntreprise = entreprise.trim() !== "" ? entreprise.replace(/\s+/g, "_") : "bon_de_commande";
       doc.save(`${nomEntreprise}.pdf`);
     };
-  
+
     img.onerror = () => {
       console.error("Erreur de chargement du logo.");
       alert("Impossible de charger le logo.");
     };
   };
-  
 
   return (
     <div className="container">
       <div className="flex justify-center mb-4">
-        <img src="./logo.png" alt="Logo de l'entreprise" className="h-16" />
+        <img src={logo} alt="Logo de l'entreprise" className="h-16" />
       </div>
       <h1>Bon de Commande</h1>
 
@@ -101,14 +99,20 @@ export default function BonDeCommande() {
           type="text"
           placeholder="Nom de l'entreprise"
           value={entreprise}
-          onChange={(e) => setEntreprise(e.target.value)}
+          onChange={(e) => {
+            setEntreprise(e.target.value);
+            handleFirstInput();
+          }}
         />
         <input
           className="input-field"
           type="email"
           placeholder="Email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            handleFirstInput();
+          }}
         />
       </div>
 
