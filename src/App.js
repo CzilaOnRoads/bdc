@@ -10,7 +10,7 @@ export default function BonDeCommande() {
   const [articles, setArticles] = useState([]);
 
   const ajouterArticle = () => {
-    setArticles([...articles, { reference: "", prixHT: 0, quantite: 1, remise: 0 }]);
+    setArticles([...articles, { reference: "", quantite: 1, prixHT: 0,  remise: 0 }]);
   };
 
   const mettreAJourArticle = (index, field, value) => {
@@ -30,44 +30,51 @@ export default function BonDeCommande() {
   const totalGeneralHT = articles.reduce((total, article) => total + parseFloat(calculerTotalArticle(article)), 0);
   const totalTTC = (totalGeneralHT * 1.2).toFixed(2);
 
-  const genererPDF = async () => {
+  const genererPDF = () => {
     const doc = new jsPDF();
   
-    // Ajouter le logo (remplace "logo.png" par ton vrai chemin)
+    // Charger l'image en Base64 avant de générer le PDF
     const img = new Image();
-    img.src = "/logo.png"; // Assure-toi que le fichier est accessible dans /public/
-    
-    img.onload = function () {
-      doc.addImage(img, "PNG", 10, 5, 50, 20); // Position X=10, Y=5, largeur=50, hauteur=20
+    img.src = logo; // Assurez-vous que logo est bien importé au début du fichier
+  
+    img.onload = () => {
+      doc.addImage(img, "PNG", 10, 5, 50, 20); // Ajout du logo en haut à gauche
   
       doc.setFontSize(16);
-      doc.text("Bon de commande", 105, 35, null, null, "center"); // Ajuste la position sous le logo
-    
-      // Continuer la génération du PDF...
+      doc.text("Bon de commande", 105, 35, { align: "center" });
+  
       doc.setFontSize(12);
       doc.text(`Entreprise: ${entreprise}`, 10, 50);
       doc.text(`Email: ${email}`, 10, 60);
   
       autoTable(doc, {
         startY: 70,
-        head: [["Référence", "Prix HT (€)", "Quantité", "Remise (%)", "Total (€)"]],
+        head: [["Référence", "Quantité", "Prix HT (€)", "Remise (%)", "Total (€)"]],
         body: articles.map((article) => [
           article.reference,
-          article.prixHT.toFixed(2),
           article.quantite,
+          article.prixHT.toFixed(2),
           article.remise,
           calculerTotalArticle(article),
         ]),
         theme: "grid",
       });
   
-      doc.text(`Total: ${totalGeneralHT.toFixed(2)} € HT`, 10, doc.lastAutoTable.finalY + 10);
-      doc.text(`Total TTC: ${totalTTC} € TTC`, 10, doc.lastAutoTable.finalY + 20);
+      const positionY = doc.lastAutoTable.finalY + 10;
+      doc.text(`Total HT: ${totalGeneralHT.toFixed(2)} €`, 10, positionY);
+      doc.text(`Total TTC: ${totalTTC} €`, 10, positionY + 10);
   
-      // Sauvegarde du PDF
-      doc.save("bon_de_commande.pdf");
+      // Nom du fichier avec le nom de l'entreprise
+      const nomEntreprise = entreprise.trim() !== "" ? entreprise.replace(/\s+/g, "_") : "bon_de_commande";
+      doc.save(`BDC-${nomEntreprise}.pdf`);
+    };
+  
+    img.onerror = () => {
+      console.error("Erreur de chargement du logo.");
+      alert("Impossible de charger le logo.");
     };
   };
+  
 
   return (
     <div className="container">
@@ -100,8 +107,8 @@ export default function BonDeCommande() {
           <thead>
             <tr>
               <th>Référence</th>
-              <th>Prix HT (€)</th>
               <th>Quantité</th>
+              <th>Prix HT (€)</th>
               <th>Remise (%)</th>
               <th>Total (€)</th>
               <th>Action</th>
@@ -122,18 +129,18 @@ export default function BonDeCommande() {
                   <input
                     className="table-input"
                     type="number"
-                    min="0"
-                    value={article.prixHT}
-                    onChange={(e) => mettreAJourArticle(index, "prixHT", e.target.value)}
+                    min="1"
+                    value={article.quantite}
+                    onChange={(e) => mettreAJourArticle(index, "quantite", e.target.value)}
                   />
                 </td>
                 <td>
                   <input
                     className="table-input"
                     type="number"
-                    min="1"
-                    value={article.quantite}
-                    onChange={(e) => mettreAJourArticle(index, "quantite", e.target.value)}
+                    min="0"
+                    value={article.prixHT}
+                    onChange={(e) => mettreAJourArticle(index, "prixHT", e.target.value)}
                   />
                 </td>
                 <td>
