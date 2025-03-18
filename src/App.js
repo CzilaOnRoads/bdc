@@ -1,10 +1,11 @@
 import { useState } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import "./styles.css"; // Assurez-vous que ce fichier est bien importé
+import "./styles.css";
 import logo from "./logo.png";
 
 export default function BonDeCommande() {
+  const [typeDocument, setTypeDocument] = useState("Bon de commande");
   const [dateSaisie, setDateSaisie] = useState(null);
   const [entreprise, setEntreprise] = useState("");
   const [email, setEmail] = useState("");
@@ -51,7 +52,7 @@ export default function BonDeCommande() {
     img.onload = () => {
       doc.addImage(img, "PNG", 10, 5, 50, 20);
       doc.setFontSize(16);
-      doc.text("Bon de commande", 105, 35, { align: "center" });
+      doc.text(typeDocument, 105, 35, { align: "center" });
 
       doc.setFontSize(12);
       doc.text(`Entreprise: ${entreprise}`, 10, 50);
@@ -75,8 +76,8 @@ export default function BonDeCommande() {
       doc.text(`Total HT: ${totalGeneralHT.toFixed(2)} €`, 10, positionY);
       doc.text(`Total TTC: ${totalTTC} €`, 10, positionY + 10);
 
-      const nomEntreprise = entreprise.trim() !== "" ? entreprise.replace(/\s+/g, "_") : "bon_de_commande";
-      doc.save(`${nomEntreprise}.pdf`);
+      const nomEntreprise = entreprise.trim() !== "" ? entreprise.replace(/\s+/g, "_") : "document";
+      doc.save(`${typeDocument.replace(/\s+/g, "_")}_${nomEntreprise}.pdf`);
     };
 
     img.onerror = () => {
@@ -90,7 +91,20 @@ export default function BonDeCommande() {
       <div className="flex justify-center mb-4">
         <img src={logo} alt="Logo de l'entreprise" className="h-16" />
       </div>
-      <h1>Bon de Commande</h1>
+      <h1>{typeDocument}</h1>
+
+      {/* Sélection du type de document */}
+      <div className="form-group">
+        <label>Type de document :</label>
+        <select
+          className="input-field"
+          value={typeDocument}
+          onChange={(e) => setTypeDocument(e.target.value)}
+        >
+          <option value="Bon de commande">Bon de commande</option>
+          <option value="Bon de livraison">Bon de livraison</option>
+        </select>
+      </div>
 
       {/* Champs Entreprise et Email */}
       <div className="form-group">
